@@ -1,13 +1,12 @@
 package com.io.codetracker.infrastructure.auth.config;
 
-import com.io.codetracker.domain.auth.factory.AuthFactory;
-import com.io.codetracker.domain.auth.factory.GithubAccountFactory;
-import com.io.codetracker.domain.auth.repository.AuthDomainRepository;
-import com.io.codetracker.domain.auth.repository.GithubAccountDomainRepository;
 import com.io.codetracker.domain.auth.service.*;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
@@ -19,23 +18,19 @@ public class AuthBeanConfig {
     }
 
     @Bean
-    public AuthCreationService authCreationService(@Qualifier("defaultAuthFactory") AuthFactory factory,@Qualifier("domainAuthRepositoryImpl") AuthDomainRepository repository) {
-        return new AuthCreationService(factory,repository);
-    }
-
-    @Bean
-    public GithubAccountCreationService githubAccountCreationService(GithubAccountDomainRepository repository, GithubAccountFactory factory) {
-        return new GithubAccountCreationService(repository, factory);
-    }
-    
-    @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 
     @Bean
-    public RefreshTokenCreationService refreshTokenCreationService (RefreshTokenLifetimePolicy refreshTokenLifetimePolicy) {
-        return new RefreshTokenCreationService(refreshTokenLifetimePolicy);
+    public RestClient restClient(@Value("${rest-client.connect-timeout-ms}") int connectTimeout, @Value("${rest-client.read-timeout-ms}") int readTimeout) {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(connectTimeout);
+        factory.setReadTimeout(readTimeout);
+
+        return RestClient.builder()
+                .requestFactory(factory)
+                .build();
     }
 
 }
