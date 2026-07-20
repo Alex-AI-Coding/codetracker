@@ -5,6 +5,8 @@ import com.io.codetracker.domain.classroom.repository.ClassroomDomainRepository;
 import com.io.codetracker.domain.classroom.repository.ClassroomStudentDomainRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Service
 public class ChatbotAccessService {
 
@@ -20,7 +22,7 @@ public class ChatbotAccessService {
     }
 
     public ClassroomAccess getAccess(
-            String userId,
+            UUID userId,
             String classroomId
     ) {
 
@@ -36,12 +38,10 @@ public class ChatbotAccessService {
             return ClassroomAccess.NONE;
         }
 
-        // The classroom creator/instructor
         if (userId.equals(classroom.getInstructorUserId())) {
             return ClassroomAccess.INSTRUCTOR;
         }
 
-        // A student who belongs to this classroom
         boolean isStudent =
                 classroomStudentRepository
                         .existsByClassroomIdAndStudentUserId(
@@ -53,7 +53,6 @@ public class ChatbotAccessService {
             return ClassroomAccess.STUDENT;
         }
 
-        // User has no access to this classroom
         return ClassroomAccess.NONE;
     }
 

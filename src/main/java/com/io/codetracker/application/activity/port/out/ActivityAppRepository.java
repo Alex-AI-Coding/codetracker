@@ -5,13 +5,29 @@ import com.io.codetracker.domain.activity.entity.Activity;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface ActivityAppRepository {
+
     Activity save(Activity data);
-    List<Activity> findActivitiesByClassroomIdAndInstructorUserId(String classroomId, String instructorId);
+
+    List<Activity> findActivitiesByClassroomIdAndInstructorUserId(
+            String classroomId,
+            UUID instructorId
+    );
+
     Optional<Activity> findById(String activityId);
+
     void deleteByActivityId(String activityId);
+
     void update(Activity updatedActivity);
-    List<StudentActivityViewData> findStudentActivities(String classroomId, String userId);
-    List<Activity> findActivitiesByClassroomId(String classroomId);
+
+    List<StudentActivityViewData> findStudentActivities(
+            String classroomId,
+            UUID userId
+    );
+
+    List<Activity> findActivitiesByClassroomId(
+            String classroomId
+    );
 }

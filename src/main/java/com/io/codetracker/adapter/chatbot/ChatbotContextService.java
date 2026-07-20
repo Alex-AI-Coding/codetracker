@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,7 @@ public class ChatbotContextService {
     }
 
     public String buildContext(
-            String userId,
+            UUID userId,
             String classroomId,
             ChatbotAccessService.ClassroomAccess access
     ) {
@@ -56,14 +57,10 @@ public class ChatbotContextService {
 
         if (access == ChatbotAccessService.ClassroomAccess.STUDENT) {
 
-            // Get ALL activities in the classroom.
-            // This includes activities where the student has
-            // not yet linked a repository or submitted anything.
             List<Activity> classroomActivities =
                     activityRepository
                             .findActivitiesByClassroomId(classroomId);
 
-            // Get this student's existing activity/submission records.
             List<StudentActivityViewData> studentActivities =
                     activityRepository
                             .findStudentActivities(
@@ -89,7 +86,7 @@ public class ChatbotContextService {
                 studentActivityInfoRepository
                         .findClassroomStudents(classroomId);
 
-        Map<String, String> studentNames =
+        Map<UUID, String> studentNames =
                 students.stream()
                         .collect(
                                 Collectors.toMap(

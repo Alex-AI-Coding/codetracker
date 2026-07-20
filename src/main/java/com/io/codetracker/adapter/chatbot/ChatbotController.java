@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/chatbot")
 public class ChatbotController {
@@ -46,7 +48,7 @@ public class ChatbotController {
                     ));
         }
 
-        String userId = principal.getUserId();
+        UUID userId = principal.getUserId();
 
         String accessLevel = "GENERAL";
         String verifiedContext = "";

@@ -15,8 +15,8 @@ public class AuthMapper {
             password = HashedPassword.of(entity.getPassword()).data();
         }
         
-        return new Auth(
-            entity.getAuthId(),
+        return Auth.reconstitute(
+            entity.getId(),
             entity.getUserId(),
             email,
             entity.getUsername(),
@@ -32,17 +32,17 @@ public class AuthMapper {
         if (auth.getPassword() != null) {
             passwordValue = auth.getPassword().getValue();
         }
-        
-        return new AuthEntity(
-            auth.getAuthId(),
-            auth.getUserId(),
-            auth.getEmail().getValue(),
-            auth.getUsername(),
-            passwordValue,
-            auth.getCreatedAt(),
-            auth.getStatus(),
-            auth.getRole()
-        );
+
+        return AuthEntity.builder()
+                .id(auth.getAuthId())
+                .userId(auth.getUserId())
+                .email(auth.getEmail().getValue())
+                .username(auth.getUsername())
+                .password(passwordValue)
+                .createdAt(auth.getCreatedAt())
+                .status(auth.getStatus())
+                .role(auth.getRole())
+                .build();
     }
 
 }

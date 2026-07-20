@@ -11,65 +11,100 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface JpaActivityRepository extends JpaRepository<ActivityEntity, String> {
-    boolean existsByClassroomEntity_ClassroomIdAndActivityId(String classroomId, String activityId);
-    List<ActivityEntity> findByClassroomEntity_ClassroomIdAndClassroomEntity_InstructorUserId(String classroomId, String instructorUserId);
-List<ActivityEntity> findByClassroomEntity_ClassroomId(
-        String classroomId
-);
-    @Query("""
-    SELECT new com.io.codetracker.application.activity.result.StudentActivityViewData(
-        a.activityId,
-        a.title,
-        a.description,
-        a.maxScore,
-        a.dueDate,
-        sa.studentActivityId,
-        gs.repositoryName,
-        gs.repositoryUrl,
-        gs.mode,
-        gs.submittedAt,
-        sa.submissionStatus,
-        sa.score,
-        sa.feedback,
-        a.status
-    )
-    FROM StudentActivityEntity sa
-    JOIN sa.activityEntity a
-    LEFT JOIN sa.githubSubmission gs
-    WHERE a.classroomEntity.classroomId = :classroomId
-      AND sa.userEntity.userId = :userId
-    """)
-    List<StudentActivityViewData> findStudentActivityViewsByClassroomIdAndUserId(
-            @Param("classroomId") String classroomId,
-            @Param("userId") String userId
+public interface JpaActivityRepository
+        extends JpaRepository<ActivityEntity, String> {
+
+    boolean existsByClassroomEntity_ClassroomIdAndActivityId(
+            String classroomId,
+            String activityId
     );
 
-    long countByClassroomEntity_ClassroomIdAndStatus(String classroomId, ActivityStatus status);
-    long countByClassroomEntity_ClassroomId(String classroomId);
+    List<ActivityEntity>
+    findByClassroomEntity_ClassroomIdAndClassroomEntity_InstructorUserId(
+            String classroomId,
+            UUID instructorUserId
+    );
 
-        @Query("""
-                        SELECT a.maxScore
-                        FROM ActivityEntity a
-                        WHERE a.classroomEntity.classroomId = :classroomId
-                            AND a.activityId = :activityId
-                        """)
-        Optional<Integer> findMaxScoreByClassroomIdAndActivityId(@Param("classroomId") String classroomId,
-                                                                                                                            @Param("activityId") String activityId);
-
-    @Query("SELECT a FROM ActivityEntity a WHERE a.classroomEntity.classroomId = :classroomId")
-    List<ActivityEntity> findActivitiesByClassroomId(@Param("classroomId") String classroomId);
+    // Used by the chatbot to retrieve all activities
+    // in a classroom, including activities that a student
+    // has not submitted yet.
+    List<ActivityEntity> findByClassroomEntity_ClassroomId(
+            String classroomId
+    );
 
     @Query("""
-            SELECT new com.io.codetracker.application.classroom.result.ClassroomActivityCreatedData(
-                a.activityId,
-                a.title,
-                a.createdAt
-            )
-            FROM ActivityEntity a
-            WHERE a.classroomEntity.classroomId = :classroomId
-            ORDER BY a.createdAt DESC
-            """)
-    List<ClassroomActivityCreatedData> findRecentCreatedActivitiesByClassroomId(@Param("classroomId") String classroomId, Pageable pageable);
+        SELECT new com.io.codetracker.application.activity.result.StudentActivityViewData(
+            a.activityId,
+            a.title,
+            a.description,
+            a.maxScore,
+            a.dueDate,
+            sa.studentActivityId,
+            gs.repositoryName,
+            gs.repositoryUrl,
+            gs.mode,
+            gs.submittedAt,
+            sa.submissionStatus,
+            sa.score,
+            sa.feedback,
+            a.status
+        )
+        FROM StudentActivityEntity sa
+        JOIN sa.activityEntity a
+        LEFT JOIN sa.githubSubmission gs
+        WHERE a.classroomEntity.classroomId = :classroomId
+          AND sa.userEntity.userId = :userId
+        """)
+    List<StudentActivityViewData>
+    findStudentActivityViewsByClassroomIdAndUserId(
+            @Param("classroomId") String classroomId,
+            @Param("userId") UUID userId
+    );
+
+    long countByClassroomEntity_ClassroomIdAndStatus(
+            String classroomId,
+            ActivityStatus status
+    );
+
+    long countByClassroomEntity_ClassroomId(
+            String classroomId
+    );
+
+    @Query("""
+        SELECT a.maxScore
+        FROM ActivityEntity a
+        WHERE a.classroomEntity.classroomId = :classroomId
+          AND a.activityId = :activityId
+        """)
+    Optional<Integer> findMaxScoreByClassroomIdAndActivityId(
+            @Param("classroomId") String classroomId,
+            @Param("activityId") String activityId
+    );
+
+    @Query("""
+        SELECT a
+        FROM ActivityEntity a
+        WHERE a.classroomEntity.classroomId = :classroomId
+        """)
+    List<ActivityEntity> findActivitiesByClassroomId(
+            @Param("classroomId") String classroomId
+    );
+
+    @Query("""
+        SELECT new com.io.codetracker.application.classroom.result.ClassroomActivityCreatedData(
+            a.activityId,
+            a.title,
+            a.createdAt
+        )
+        FROM ActivityEntity a
+        WHERE a.classroomEntity.classroomId = :classroomId
+        ORDER BY a.createdAt DESC
+        """)
+    List<ClassroomActivityCreatedData>
+    findRecentCreatedActivitiesByClassroomId(
+            @Param("classroomId") String classroomId,
+            Pageable pageable
+    );
 }
