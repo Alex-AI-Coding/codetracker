@@ -35,24 +35,44 @@ public class ChatbotController {
         if (principal == null) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
-                    .body(new ChatbotResponse(
-                            "You must be logged in to use the CodeTracker Assistant."
-                    ));
+                    .body(
+                            new ChatbotResponse(
+                                    "You must be logged in to use the CodeTracker Assistant."
+                            )
+                    );
         }
 
-        if (request.message() == null || request.message().isBlank()) {
+        if (
+                request.message() == null ||
+                request.message().isBlank()
+        ) {
             return ResponseEntity
                     .badRequest()
-                    .body(new ChatbotResponse(
-                            "Please enter a message."
-                    ));
+                    .body(
+                            new ChatbotResponse(
+                                    "Please enter a message."
+                            )
+                    );
         }
 
         UUID userId = principal.getUserId();
 
-        String accessLevel = "GENERAL";
-        String verifiedContext = "";
+        /*
+         * By default, the chatbot is on the dashboard.
+         * It receives only the authenticated user's owned
+         * and joined classroom information.
+         */
+        String accessLevel = "DASHBOARD";
 
+        String verifiedContext =
+                chatbotContextService
+                        .buildDashboardContext(userId);
+
+        /*
+         * When a classroom ID is supplied, verify access
+         * using the backend before giving the chatbot
+         * any classroom-specific information.
+         */
         if (
                 request.classroomId() != null &&
                 !request.classroomId().isBlank()
@@ -64,12 +84,18 @@ public class ChatbotController {
                             request.classroomId()
                     );
 
-            if (access == ChatbotAccessService.ClassroomAccess.NONE) {
+            if (
+                    access ==
+                    ChatbotAccessService.ClassroomAccess.NONE
+            ) {
+
                 return ResponseEntity
                         .status(HttpStatus.FORBIDDEN)
-                        .body(new ChatbotResponse(
-                                "You do not have permission to access information from this classroom."
-                        ));
+                        .body(
+                                new ChatbotResponse(
+                                        "You do not have permission to access information from this classroom."
+                                )
+                        );
             }
 
             accessLevel = access.name();
@@ -82,11 +108,12 @@ public class ChatbotController {
                     );
         }
 
-        String reply = geminiService.generateResponse(
-                request.message(),
-                accessLevel,
-                verifiedContext
-        );
+        String reply =
+                geminiService.generateResponse(
+                        request.message(),
+                        accessLevel,
+                        verifiedContext
+                );
 
         return ResponseEntity.ok(
                 new ChatbotResponse(reply)
