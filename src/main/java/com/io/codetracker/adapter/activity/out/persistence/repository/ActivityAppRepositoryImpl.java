@@ -62,4 +62,13 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
     public List<StudentActivityViewData> findStudentActivities(String classroomId, String userId) {
         return jpa.findStudentActivityViewsByClassroomIdAndUserId(classroomId, userId);
     }
+    @Override
+public List<Activity> findActivitiesByClassroomId(String classroomId) {
+
+    return jpa
+            .findByClassroomEntity_ClassroomId(classroomId)
+            .stream()
+            .map(ActivityMapper::toDomain)
+            .toList();
+}
 }

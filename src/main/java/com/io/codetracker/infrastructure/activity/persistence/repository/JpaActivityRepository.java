@@ -15,7 +15,9 @@ import java.util.Optional;
 public interface JpaActivityRepository extends JpaRepository<ActivityEntity, String> {
     boolean existsByClassroomEntity_ClassroomIdAndActivityId(String classroomId, String activityId);
     List<ActivityEntity> findByClassroomEntity_ClassroomIdAndClassroomEntity_InstructorUserId(String classroomId, String instructorUserId);
-
+List<ActivityEntity> findByClassroomEntity_ClassroomId(
+        String classroomId
+);
     @Query("""
     SELECT new com.io.codetracker.application.activity.result.StudentActivityViewData(
         a.activityId,

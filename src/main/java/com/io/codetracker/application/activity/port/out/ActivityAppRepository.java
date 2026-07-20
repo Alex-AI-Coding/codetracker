@@ -13,4 +13,5 @@ public interface ActivityAppRepository {
     void deleteByActivityId(String activityId);
     void update(Activity updatedActivity);
     List<StudentActivityViewData> findStudentActivities(String classroomId, String userId);
+    List<Activity> findActivitiesByClassroomId(String classroomId);
 }
