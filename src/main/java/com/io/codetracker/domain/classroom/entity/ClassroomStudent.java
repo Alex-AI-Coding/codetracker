@@ -1,6 +1,5 @@
 package com.io.codetracker.domain.classroom.entity;
 
-
 import java.util.UUID;
 import com.io.codetracker.domain.classroom.valueObject.StudentStatus;
 
@@ -8,14 +7,14 @@ import java.time.Instant;
 
 public final class ClassroomStudent {
 
-    private final String classroomId;
+    private final UUID classroomId;
     private final UUID studentUserId;
     private StudentStatus status;
     private Instant lastActiveAt;
     private final Instant joinedAt;
     private Instant leftAt;
 
-    public ClassroomStudent(String classroomId, UUID studentUserId, StudentStatus status, Instant lastActiveAt, Instant joinedAt, Instant leftAt) {
+    private ClassroomStudent(UUID classroomId, UUID studentUserId, StudentStatus status, Instant lastActiveAt, Instant joinedAt, Instant leftAt) {
         this.classroomId = classroomId;
         this.studentUserId = studentUserId;
         this.status = status;
@@ -24,7 +23,33 @@ public final class ClassroomStudent {
         this.leftAt = leftAt;
     }
 
-    public String getClassroomId() {
+    public static ClassroomStudent createPendingStudent(UUID classroomId, UUID studentUserId) {
+        return new ClassroomStudent(
+                classroomId,
+                studentUserId,
+                StudentStatus.PENDING,
+                null,
+                Instant.now(),
+                null
+        );
+    }
+
+    public static ClassroomStudent createActiveStudent(UUID classroomId, UUID studentUserId) {
+        return new ClassroomStudent(
+                classroomId,
+                studentUserId,
+                StudentStatus.ACTIVE,
+                Instant.now(),
+                Instant.now(),
+                null
+        );
+    }
+
+    public static ClassroomStudent reconstitute(UUID classroomId, UUID studentUserId, StudentStatus status, Instant lastActiveAt, Instant joinedAt, Instant leftAt) {
+        return new ClassroomStudent(classroomId, studentUserId, status, lastActiveAt, joinedAt, leftAt);
+    }
+
+    public UUID getClassroomId() {
         return classroomId;
     }
 
@@ -87,7 +112,7 @@ public final class ClassroomStudent {
         this.leftAt = Instant.now();
     }
 
-    public void rejoin() {
+    public void rejoinWithoutApproval() {
         if (status != StudentStatus.DROPPED) {
             throw new IllegalStateException("Only dropped students can rejoin classroom.");
         }
@@ -95,5 +120,12 @@ public final class ClassroomStudent {
         this.lastActiveAt = Instant.now();
         this.leftAt = null;
     }
-}
 
+    public void rejoinWithApproval() {
+        if (status != StudentStatus.DROPPED) {
+            throw new IllegalStateException("Only dropped students can rejoin classroom.");
+        }
+        this.status = StudentStatus.PENDING;
+        this.leftAt = null;
+    }
+}

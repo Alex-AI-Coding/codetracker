@@ -1,6 +1,7 @@
 package com.io.codetracker.application.auth.service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import com.io.codetracker.application.auth.command.AuthRegisterOAuthCommand;
 import com.io.codetracker.application.auth.command.GithubOAuthSignInCommand;
@@ -15,6 +16,7 @@ import com.io.codetracker.application.auth.result.GithubOAuthSignInData;
 import com.io.codetracker.application.auth.result.RegisterRefreshTokenResult;
 import com.io.codetracker.common.result.Result;
 import com.io.codetracker.domain.auth.aggregate.AuthAccountAggregate;
+import com.io.codetracker.domain.auth.entity.Auth;
 import com.io.codetracker.domain.auth.entity.GithubAccount;
 import com.io.codetracker.domain.auth.valueobject.Roles;
 import com.io.codetracker.domain.auth.valueobject.Status;
@@ -41,33 +43,21 @@ public class OAuthGithubSignInService implements OAuthGithubSignInUseCase {
                 authAppRepository.save(aggregate);
             }
 
-            Result<RegisterRefreshTokenResult, RegisterRefreshTokenError> refreshTokenResult =
-                    addRefreshTokenUseCase.add(
-                            existing.getId(),
-                            command.deviceId(),
-                            command.ipAddress(),
-                            command.userAgent()
-                    );
-
-            if (!refreshTokenResult.success()) {
-                return Result.fail(GithubOAuthSignInError.from(refreshTokenResult.error()));
-            }
-
-            String plainRefreshToken = refreshTokenResult.data().rawToken();
-
             boolean alreadyInitialized = authAppRepository.findByAuthId(existing.getId())
                     .map(auth -> auth.getStatus() == Status.ACTIVE)
                     .orElse(false);
 
-            return Result.ok(new GithubOAuthSignInData(
-                    existing.getId(),
-                    alreadyInitialized,
-                    plainRefreshToken
-            ));
+            return completeSignIn(existing.getId(), alreadyInitialized, command);
         }
 
-        if (authAppRepository.emailExists(command.email())) {
-            return Result.fail(GithubOAuthSignInError.EMAIL_TAKEN);
+        Optional<Auth> authWithSameEmail = authAppRepository.findByEmail(command.email());
+        if (authWithSameEmail.isPresent()) {
+            Auth auth = authWithSameEmail.get();
+            AuthAccountAggregate recoveredAggregate = new AuthAccountAggregate(auth, new GithubAccount(auth.getAuthId(), command.githubId(), command.accessToken()));
+
+            authAppRepository.save(recoveredAggregate);
+
+            return completeSignIn(auth.getAuthId(), auth.getStatus() == Status.ACTIVE, command);
         }
 
         if (authAppRepository.existsByUsername(command.username())) {
@@ -92,11 +82,13 @@ public class OAuthGithubSignInService implements OAuthGithubSignInUseCase {
 
         AuthAccountAggregate aggregate = authRegistrationResult.data();
 
-        authAppRepository.save(aggregate);
+        return completeSignIn(aggregate.auth().getAuthId(), false, command);
+    }
 
+    private Result<GithubOAuthSignInData, GithubOAuthSignInError> completeSignIn(UUID authId, boolean alreadyInitialized, GithubOAuthSignInCommand command) {
         Result<RegisterRefreshTokenResult, RegisterRefreshTokenError> refreshTokenResult =
                 addRefreshTokenUseCase.add(
-                        aggregate.auth().getAuthId(),
+                        authId,
                         command.deviceId(),
                         command.ipAddress(),
                         command.userAgent()
@@ -107,8 +99,8 @@ public class OAuthGithubSignInService implements OAuthGithubSignInUseCase {
         }
 
         return Result.ok(new GithubOAuthSignInData(
-                aggregate.auth().getAuthId(),
-                false,
+                authId,
+                alreadyInitialized,
                 refreshTokenResult.data().rawToken()
         ));
     }

@@ -21,12 +21,8 @@ public class ChatbotAccessService {
         this.classroomStudentRepository = classroomStudentRepository;
     }
 
-    public ClassroomAccess getAccess(
-            UUID userId,
-            String classroomId
-    ) {
-
-        if (classroomId == null || classroomId.isBlank()) {
+    public ClassroomAccess getAccess(UUID userId, UUID classroomId) {
+        if (userId == null || classroomId == null) {
             return ClassroomAccess.NONE;
         }
 
@@ -42,18 +38,12 @@ public class ChatbotAccessService {
             return ClassroomAccess.INSTRUCTOR;
         }
 
-        boolean isStudent =
-                classroomStudentRepository
-                        .existsByClassroomIdAndStudentUserId(
-                                classroomId,
-                                userId
-                        );
+        boolean isStudent = classroomStudentRepository
+                .existsByClassroomIdAndStudentUserId(classroomId, userId);
 
-        if (isStudent) {
-            return ClassroomAccess.STUDENT;
-        }
-
-        return ClassroomAccess.NONE;
+        return isStudent
+                ? ClassroomAccess.STUDENT
+                : ClassroomAccess.NONE;
     }
 
     public enum ClassroomAccess {

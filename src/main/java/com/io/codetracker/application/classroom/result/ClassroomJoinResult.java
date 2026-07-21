@@ -7,15 +7,16 @@ import com.io.codetracker.domain.classroom.valueObject.StudentStatus;
 
 import java.time.Instant;
 
-public record ClassroomJoinResult (String classroomId,
+public record ClassroomJoinResult (UUID classroomId,
                                    UUID studentUserId,
                                    StudentStatus status,
                                    Instant joinedAt,
                                    Instant lastActiveAt,
                                    Instant leftAt,
-                                   boolean hasPassword){
+                                   boolean hasPassword,
+                                   boolean needsApproval){
 
-    public static ClassroomJoinResult from(ClassroomStudent student, boolean hasPassword) {
+    public static ClassroomJoinResult from(ClassroomStudent student, boolean hasPassword, boolean needsApproval) {
         return new ClassroomJoinResult(
                 student.getClassroomId(),
                 student.getStudentUserId(),
@@ -23,7 +24,8 @@ public record ClassroomJoinResult (String classroomId,
                 student.getJoinedAt(),
                 student.getLastActiveAt(),
                 student.getLeftAt(),
-                hasPassword
+                hasPassword,
+                needsApproval
         );
     }
 }

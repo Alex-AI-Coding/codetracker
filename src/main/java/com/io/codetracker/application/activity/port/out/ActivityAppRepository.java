@@ -12,9 +12,11 @@ public interface ActivityAppRepository {
     Activity save(Activity data);
 
     List<Activity> findActivitiesByClassroomIdAndInstructorUserId(
-            String classroomId,
+            UUID classroomId,
             UUID instructorId
     );
+
+    List<Activity> findActivitiesByClassroomId(UUID classroomId);
 
     Optional<Activity> findById(String activityId);
 
@@ -23,11 +25,7 @@ public interface ActivityAppRepository {
     void update(Activity updatedActivity);
 
     List<StudentActivityViewData> findStudentActivities(
-            String classroomId,
+            UUID classroomId,
             UUID userId
-    );
-
-    List<Activity> findActivitiesByClassroomId(
-            String classroomId
     );
 }

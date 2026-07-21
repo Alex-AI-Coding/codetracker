@@ -23,10 +23,8 @@ public final class ClassroomJoinHttpMapper {
             case PASSCODE_REQUIRED -> "Classroom requires a passcode.";
             case WRONG_PASSCODE -> "Incorrect passcode.";
             case CLASSROOM_FULL -> "Classroom is already full.";
-            case CLASSROOM_ID_INVALID -> "Invalid classroom ID.";
-            case STUDENT_USER_ID_INVALID -> "Invalid student user ID.";
-            case STATUS_INVALID -> "Invalid student status.";
             case USER_ALREADY_IN_CLASSROOM -> "User is already in the classroom.";
+            case USER_KICKED -> "User is kicked from the classroom.";
         };
     }
 }
