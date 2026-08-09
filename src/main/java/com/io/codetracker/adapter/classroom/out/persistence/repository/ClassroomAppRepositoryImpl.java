@@ -86,23 +86,23 @@ public class ClassroomAppRepositoryImpl implements ClassroomAppRepository {
             key = "#instructorUserId",
             unless = "#result.isEmpty()"
     )
-    public List<Classroom> findByInstructorUserId(UUID instructorUserId) {
+    public List<ClassroomAggregate> findByInstructorUserId(UUID instructorUserId) {
         return jpaClassroomRepository.findByInstructorUserId(instructorUserId)
             .stream()
-            .map(ClassroomMapper::toDomain)
+            .map(ClassroomAggregateMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Classroom> findAllById(List<UUID> classroomIds) {
+    public List<ClassroomAggregate> findAllById(List<UUID> classroomIds) {
         List<ClassroomEntity> entities = jpaClassroomRepository.findAllById(classroomIds);
-        return entities.stream().map(ClassroomMapper::toDomain).collect(Collectors.toList());
+        return entities.stream().map(ClassroomAggregateMapper::toDomain).collect(Collectors.toList());
     }
 
     @Override
     @Cacheable(value = CacheNames.CLASSROOM_BY_ID, key = "#classroomId", unless = "#result.isEmpty()")
-    public Optional<Classroom> findByClassroomId(UUID classroomId) {
-        return jpaClassroomRepository.findById(classroomId).map(ClassroomMapper::toDomain);
+    public Optional<ClassroomAggregate> findByClassroomId(UUID classroomId) {
+        return jpaClassroomRepository.findById(classroomId).map(ClassroomAggregateMapper::toDomain);
     }
 
     @Override
@@ -120,10 +120,5 @@ public class ClassroomAppRepositoryImpl implements ClassroomAppRepository {
     @Override
     public boolean existsByClassroomIdAndInstructorUserId(UUID classroomId, UUID instructorUserId) {
         return jpaClassroomRepository.existsByClassroomIdAndInstructorUserId(classroomId, instructorUserId);
-    }
-
-    @Override
-    public Integer findMaxStudentByClassroomId(UUID classroomId) {
-        return jpaClassroomSettingsRepository.findMaxStudentByClassroomId(classroomId);
     }
 }
