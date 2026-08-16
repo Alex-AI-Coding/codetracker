@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.io.kira.adapter.classroom.out.cache.ClassroomCacheNames;
+import com.io.kira.adapter.classroom.out.cache.ClassroomStudentCacheEvictor;
 import com.io.kira.adapter.classroom.out.persistence.mapper.ClassroomStudentMapper;
 import com.io.kira.application.classroom.port.out.ClassroomStudentAppRepository;
 import com.io.kira.domain.classroom.entity.ClassroomStudent;
@@ -16,9 +17,7 @@ import com.io.kira.infrastructure.classroom.persistence.repository.JpaClassroomR
 import com.io.kira.infrastructure.classroom.persistence.repository.JpaClassroomStudentRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 
 
 @Repository
@@ -27,12 +26,9 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
 
     private final JpaClassroomStudentRepository jpaClassroomStudentRepository;
     private final JpaClassroomRepository jpaClassroomRepository;
+    private final ClassroomStudentCacheEvictor cacheEvictor;
 
     @Override
-    @Caching(evict = {
-            @CacheEvict(value = ClassroomCacheNames.CLASSROOM_STUDENT, allEntries = true),
-            @CacheEvict(value = ClassroomCacheNames.CLASSROOM, allEntries = true)
-    })
     public boolean save(ClassroomStudent classroomStudent) {
 
         Optional<ClassroomEntity> classroomEntityOpt = jpaClassroomRepository.findByClassroomId((classroomStudent.getClassroomId()));
@@ -53,6 +49,7 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
 
         classroomEntity.addStudent(entity);
         jpaClassroomStudentRepository.save(entity);
+        cacheEvictor.evictFor(classroomStudent.getClassroomId(), classroomStudent.getStudentUserId());
         return true;
     }
 
@@ -76,7 +73,6 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
     }
 
     @Override
-    @Cacheable(value = ClassroomCacheNames.CLASSROOM_STUDENT, key = "@classroomStudentCacheKey.activeCountsByClassroomIds(#classroomIds)")
     public Map<UUID, Long> countActiveClassroomStudentByClassroomIds(List<UUID> classroomIds) {
         Map<UUID, Long> countMap = new HashMap<>();
         for (UUID classroomId : classroomIds) {
@@ -105,7 +101,7 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
     }
 
     @Override
-    @Cacheable(value = ClassroomCacheNames.CLASSROOM_STUDENT, key = "@classroomStudentCacheKey.byClassroomIdAndUserId(#classroomId, #studentUserId)", unless = "#result == null")
+    @Cacheable(value = ClassroomCacheNames.CLASSROOM_STUDENT, key = "@classroomStudentCacheKey.byClassroomIdAndUserId(#classroomId, #studentUserId)")
     public Optional<ClassroomStudent> findByClassroomIdAndStudentUserId(UUID classroomId, UUID studentUserId) {
         return jpaClassroomStudentRepository.findByClassroom_ClassroomIdAndStudentUserId(classroomId, studentUserId)
                 .map(ClassroomStudentMapper::toDomain);
