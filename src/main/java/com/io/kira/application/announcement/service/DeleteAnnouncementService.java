@@ -39,22 +39,22 @@ public class DeleteAnnouncementService implements DeleteAnnouncementUseCase {
         }
 
         Announcement announcement = announcementRepository.findById(command.announcementId()).orElse(null);
-        if (announcement == null || !announcement.classroomId().equals(command.classroomId())) {
+        if (announcement == null || !announcement.getClassroomId().equals(command.classroomId())) {
             return Result.fail(DeleteAnnouncementError.ANNOUNCEMENT_NOT_FOUND);
         }
 
-         announcementRepository.deleteById(announcement);
+        announcementRepository.deleteById(announcement);
 
-        for (AnnouncementAttachment attachment : announcement.attachments()) {
+        for (AnnouncementAttachment attachment : announcement.getAttachments()) {
             try {
                 attachmentStorage.delete(
                         command.classroomId(),
-                        attachment.attachmentId(),
-                        attachment.resourceType()
+                        attachment.getAttachmentId(),
+                        attachment.getResourceType()
                 );
             } catch (IOException ex) {
                 log.warn("Failed to delete attachment {} after deleting announcement {}",
-                        attachment.attachmentId(), announcement.announcementId(), ex);
+                        attachment.getAttachmentId(), announcement.getAnnouncementId(), ex);
             }
         }
 

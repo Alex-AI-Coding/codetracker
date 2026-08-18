@@ -84,7 +84,7 @@ public final class Announcement {
     }
 
     public void removeAttachment(UUID attachmentId) {
-        attachments.removeIf(attachment -> attachment.attachmentId().equals(attachmentId));
+        attachments.removeIf(attachment -> attachment.getAttachmentId().equals(attachmentId));
     }
 
     private static void validateMessage(String message) {
@@ -93,36 +93,36 @@ public final class Announcement {
         }
     }
 
-    public UUID announcementId() {
+    public UUID getAnnouncementId() {
         return announcementId;
     }
 
-    public UUID classroomId() {
+    public UUID getClassroomId() {
         return classroomId;
     }
 
-    public UUID authorId() {
+    public UUID getAuthorId() {
         return authorId;
     }
 
-    public String message() {
+    public String getMessage() {
         return message;
     }
 
-    public List<AnnouncementAttachment> attachments() {
+    public List<AnnouncementAttachment> getAttachments() {
         return Collections.unmodifiableList(attachments);
     }
 
-    public Instant createdAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public Instant updatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
     public Optional<AnnouncementAttachment> findAttachment(UUID attachmentId) {
-        return attachments.stream().filter(a -> a.attachmentId().equals(attachmentId)).findFirst();
+        return attachments.stream().filter(a -> a.getAttachmentId().equals(attachmentId)).findFirst();
     }
 
     public void updateMessage(String message, Instant now) {

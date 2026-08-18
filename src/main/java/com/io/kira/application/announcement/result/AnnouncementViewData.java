@@ -16,24 +16,24 @@ public record AnnouncementViewData(
         Instant updatedAt
 ) {
     public static AnnouncementViewData from(Announcement announcement) {
-        List<AttachmentData> attachmentData = announcement.attachments()
+        List<AttachmentData> attachmentData = announcement.getAttachments()
                 .stream()
                 .map(attachment -> new AttachmentData(
-                        attachment.attachmentId(),
-                        attachment.url(),
-                        attachment.type(),
-                        attachment.resourceType()
+                        attachment.getAttachmentId(),
+                        attachment.getUrl(),
+                        attachment.getType(),
+                        attachment.getResourceType()
                 ))
                 .toList();
 
         return new AnnouncementViewData(
-                announcement.announcementId(),
-                announcement.classroomId(),
-                announcement.authorId(),
-                announcement.message(),
+                announcement.getAnnouncementId(),
+                announcement.getClassroomId(),
+                announcement.getAuthorId(),
+                announcement.getMessage(),
                 attachmentData,
-                announcement.createdAt(),
-                announcement.updatedAt()
+                announcement.getCreatedAt(),
+                announcement.getUpdatedAt()
         );
     }
 }

@@ -55,7 +55,7 @@ public class EditAnnouncementService implements EditAnnouncementUseCase {
 
         Announcement announcement = maybeAnnouncement.get();
 
-        if (!announcement.classroomId().equals(command.classroomId())) {
+        if (!announcement.getClassroomId().equals(command.classroomId())) {
             return Result.fail(EditAnnouncementError.ANNOUNCEMENT_NOT_FOUND);
         }
 
@@ -104,17 +104,17 @@ public class EditAnnouncementService implements EditAnnouncementUseCase {
                 announcement.markUpdated(command.now());
             }
 
-            attachmentsToRemove.forEach(attachment -> announcement.removeAttachment(attachment.attachmentId()));
+            attachmentsToRemove.forEach(attachment -> announcement.removeAttachment(attachment.getAttachmentId()));
 
             announcementRepository.save(announcement);
 
             for (AnnouncementAttachment attachment : attachmentsToRemove) {
                 try {
                     attachmentStorage.delete(
-                            command.classroomId(), attachment.attachmentId(), attachment.resourceType());
+                            command.classroomId(), attachment.getAttachmentId(), attachment.getResourceType());
                 } catch (IOException ex) {
                     log.warn("Failed to delete removed attachment {} in classroom {}",
-                            attachment.attachmentId(), command.classroomId(), ex);
+                            attachment.getAttachmentId(), command.classroomId(), ex);
                 }
             }
 
