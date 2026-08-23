@@ -84,6 +84,14 @@ rest-client:
   connect-timeout-ms: 5000
   read-timeout-ms: 10000
 
+chatbot:
+  gemini:
+    api-key: ${GEMINI_API_KEY:}
+    model: ${GEMINI_MODEL:gemini-3.5-flash}
+    base-url: ${GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+    connect-timeout-ms: ${GEMINI_CONNECT_TIMEOUT_MS:5000}
+    read-timeout-ms: ${GEMINI_READ_TIMEOUT_MS:30000}
+
 refresh:
   token:
     lifetime:

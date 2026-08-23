@@ -1,0 +1,67 @@
+package com.io.kira.adapter.chatbot.in.rest;
+
+import com.io.kira.adapter.auth.out.security.AuthPrincipal;
+import com.io.kira.adapter.chatbot.in.dto.request.ChatbotRequest;
+import com.io.kira.adapter.chatbot.in.dto.response.ChatbotResponse;
+import com.io.kira.application.chatbot.command.ChatbotCommand;
+import com.io.kira.application.chatbot.error.ChatbotError;
+import com.io.kira.application.chatbot.port.in.ChatbotUseCase;
+import com.io.kira.application.chatbot.result.ChatbotReplyData;
+import com.io.kira.common.result.Result;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/api/chatbot")
+public class ChatbotController {
+
+    private final ChatbotUseCase chatbotUseCase;
+
+    public ChatbotController(ChatbotUseCase chatbotUseCase) {
+        this.chatbotUseCase = chatbotUseCase;
+    }
+
+    @PostMapping
+    public ResponseEntity<ChatbotResponse> chat(
+            @AuthenticationPrincipal AuthPrincipal principal,
+            @Valid @RequestBody ChatbotRequest request
+    ) {
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ChatbotResponse.fail("You must be logged in to use Echo."));
+        }
+
+        Result<ChatbotReplyData, ChatbotError> result = chatbotUseCase.execute(
+                new ChatbotCommand(
+                        principal.getUserId(),
+                        request.message().trim(),
+                        request.classroomId()
+                )
+        );
+
+        if (result.success()) {
+            return ResponseEntity.ok(ChatbotResponse.success(result.data().reply()));
+        }
+
+        return switch (result.error()) {
+            case ACCESS_DENIED -> ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ChatbotResponse.fail(
+                            "You do not have permission to access information from this classroom."
+                    ));
+            case PROVIDER_NOT_CONFIGURED -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(ChatbotResponse.fail(
+                            "Echo is not configured yet. Add the Google AI Studio API key and try again."
+                    ));
+            case PROVIDER_UNAVAILABLE -> ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                    .body(ChatbotResponse.fail(
+                            "Echo is temporarily unavailable. Please try again shortly."
+                    ));
+        };
+    }
+}

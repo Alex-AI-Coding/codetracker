@@ -55,6 +55,16 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
 
     @Override
     @Cacheable(value = ActivityCacheNames.ACTIVITY,
+            key = "@activityCacheKey.byClassroomId(#classroomId)",
+            unless = "#result.isEmpty()")
+    public List<Activity> findActivitiesByClassroomId(UUID classroomId) {
+        return jpa.findActivitiesByClassroomId(classroomId).stream()
+                .map(ActivityMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Cacheable(value = ActivityCacheNames.ACTIVITY,
             key = "@activityCacheKey.byClassroomIdAndInstructorUserId(#classroomId, #instructorId)",
             unless = "#result.isEmpty()")
     public List<Activity> findActivitiesByClassroomIdAndInstructorUserId(UUID classroomId, UUID instructorId) {
@@ -116,4 +126,3 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
         return jpa.findStudentActivityViewsByClassroomIdAndUserId(classroomId, userId);
     }
 }
-
