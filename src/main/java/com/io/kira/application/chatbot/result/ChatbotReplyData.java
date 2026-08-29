@@ -1,4 +1,11 @@
 package com.io.kira.application.chatbot.result;
 
-public record ChatbotReplyData(String reply) {
+import java.util.UUID;
+
+public record ChatbotReplyData(
+        String reply,
+        UUID threadId,
+        String threadTitle,
+        UUID classroomId
+) {
 }

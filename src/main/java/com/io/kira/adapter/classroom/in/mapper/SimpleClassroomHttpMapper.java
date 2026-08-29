@@ -13,7 +13,7 @@ public final class SimpleClassroomHttpMapper {
     public static HttpStatus toStatus(SimpleClassroomError error) {
         return switch (error) {
             case NO_CLASSROOM_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.FORBIDDEN;
         };
     }
 

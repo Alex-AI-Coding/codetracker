@@ -14,7 +14,7 @@ public final class SubmitExistingRepositoryHttpMapper {
                  GITHUB_ACCOUNT_NOT_FOUND,
                  CLASSROOM_NOT_FOUND,
                  REPOSITORY_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.FORBIDDEN;
             case ALREADY_SUBMITTED -> HttpStatus.CONFLICT;
             case SAVE_FAILED -> HttpStatus.INTERNAL_SERVER_ERROR;
         };

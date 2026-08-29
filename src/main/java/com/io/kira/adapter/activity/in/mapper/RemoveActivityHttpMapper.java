@@ -9,7 +9,7 @@ public final class RemoveActivityHttpMapper {
 
     public static HttpStatus toStatus(RemoveActivityError error) {
         return switch (error) {
-            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.FORBIDDEN;
             case ACTIVITY_NOT_FOUND -> HttpStatus.NOT_FOUND;
             default -> HttpStatus.BAD_REQUEST;
         };

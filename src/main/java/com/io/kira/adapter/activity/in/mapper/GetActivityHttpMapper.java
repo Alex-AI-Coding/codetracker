@@ -11,7 +11,7 @@ public final class GetActivityHttpMapper {
     public static HttpStatus ownerToStatus(GetClassroomOwnerActivityError error){
         return switch (error) {
             case CLASSROOM_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.BAD_REQUEST;
         };
     }
@@ -26,7 +26,7 @@ public final class GetActivityHttpMapper {
     public static HttpStatus studentToStatus(GetClassroomStudentActivityError error){
         return switch (error) {
             case CLASSROOM_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.BAD_REQUEST;
         };
     }

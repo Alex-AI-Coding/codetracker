@@ -12,7 +12,7 @@ public final class EditActivityHttpMapper {
             case ACTIVITY_NOT_FOUND,
                  UNKNOWN_CLASSROOM-> HttpStatus.NOT_FOUND;
             case ACTIVITY_ARCHIVED -> HttpStatus.CONFLICT;
-            case NOT_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case NOT_INSTRUCTOR -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.BAD_REQUEST;
         };
     }

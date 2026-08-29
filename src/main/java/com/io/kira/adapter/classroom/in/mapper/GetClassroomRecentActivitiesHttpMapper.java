@@ -11,7 +11,7 @@ public final class GetClassroomRecentActivitiesHttpMapper {
     public static HttpStatus toStatus(GetClassroomRecentActivitiesError error) {
         return switch (error) {
             case CLASSROOM_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_MEMBER -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_MEMBER -> HttpStatus.FORBIDDEN;
         };
     }
 

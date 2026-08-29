@@ -85,6 +85,8 @@ rest-client:
   read-timeout-ms: 10000
 
 chatbot:
+  rate-limit:
+    requests-per-minute: ${CHATBOT_REQUESTS_PER_MINUTE:12}
   gemini:
     api-key: ${GEMINI_API_KEY:}
     model: ${GEMINI_MODEL:gemini-3.5-flash}

@@ -11,7 +11,7 @@ public final class EditClassroomHttpMapper {
     public static HttpStatus toStatus(EditClassroomError error) {
         return switch (error) {
             case CLASSROOM_NOT_FOUND, CLASSROOM_SETTINGS_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case NOT_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case NOT_INSTRUCTOR -> HttpStatus.FORBIDDEN;
             case MAX_STUDENTS_LESS_THAN_ENROLLED -> HttpStatus.CONFLICT;
             default -> HttpStatus.BAD_REQUEST;
         };

@@ -41,18 +41,36 @@ public class ChatbotController {
                 new ChatbotCommand(
                         principal.getUserId(),
                         request.message().trim(),
-                        request.classroomId()
+                        request.classroomId(),
+                        request.threadId()
                 )
         );
 
         if (result.success()) {
-            return ResponseEntity.ok(ChatbotResponse.success(result.data().reply()));
+            return ResponseEntity.ok(ChatbotResponse.success(
+                    result.data().reply(),
+                    result.data().threadId(),
+                    result.data().threadTitle(),
+                    result.data().classroomId()
+            ));
         }
 
         return switch (result.error()) {
             case ACCESS_DENIED -> ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ChatbotResponse.fail(
                             "You do not have permission to access information from this classroom."
+                    ));
+            case THREAD_NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ChatbotResponse.fail(
+                            "This Echo conversation could not be found. It may have been deleted."
+                    ));
+            case HISTORY_SAVE_FAILED -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ChatbotResponse.fail(
+                            "Echo generated a response, but the conversation could not be saved. Please try again."
+                    ));
+            case RATE_LIMITED -> ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(ChatbotResponse.fail(
+                            "You are sending messages too quickly. Please wait a moment and try again."
                     ));
             case PROVIDER_NOT_CONFIGURED -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(ChatbotResponse.fail(

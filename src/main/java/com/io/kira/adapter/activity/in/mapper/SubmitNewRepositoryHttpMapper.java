@@ -13,7 +13,7 @@ public final class SubmitNewRepositoryHttpMapper {
                  ACTIVITY_NOT_FOUND,
                  GITHUB_ACCOUNT_NOT_FOUND,
                  CLASSROOM_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.UNAUTHORIZED;
+            case USER_NOT_CLASSROOM_STUDENT -> HttpStatus.FORBIDDEN;
             case ALREADY_SUBMITTED,
                  REPOSITORY_ALREADY_EXISTS -> HttpStatus.CONFLICT;
             case REPOSITORY_CREATE_FAILED,

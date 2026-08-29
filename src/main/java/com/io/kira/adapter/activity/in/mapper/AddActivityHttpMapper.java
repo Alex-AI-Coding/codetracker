@@ -13,7 +13,7 @@ public final class AddActivityHttpMapper {
             case INSTRUCTOR_NOT_FOUND,
                  UNKNOWN_CLASSROOM -> HttpStatus.NOT_FOUND;
             case SAVE_FAILED -> HttpStatus.INTERNAL_SERVER_ERROR;
-            case NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.UNAUTHORIZED;
+            case NOT_CLASSROOM_INSTRUCTOR -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.BAD_REQUEST;
         };
     }

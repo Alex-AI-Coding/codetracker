@@ -9,6 +9,7 @@ public record ChatbotRequest(
         @NotBlank(message = "Message is required")
         @Size(max = 2_000, message = "Message must not exceed 2000 characters")
         String message,
-        UUID classroomId
+        UUID classroomId,
+        UUID threadId
 ) {
 }

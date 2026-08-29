@@ -5,6 +5,7 @@ import java.util.UUID;
 public record ChatbotCommand(
         UUID userId,
         String message,
-        UUID classroomId
+        UUID classroomId,
+        UUID threadId
 ) {
 }

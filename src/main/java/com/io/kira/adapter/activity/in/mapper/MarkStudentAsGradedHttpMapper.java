@@ -14,7 +14,7 @@ public final class MarkStudentAsGradedHttpMapper {
                  STUDENT_NOT_FOUND,
                  REPOSITORY_SUBMISSION_NOT_FOUND -> HttpStatus.NOT_FOUND;
             case USER_NOT_CLASSROOM_INSTRUCTOR,
-                 STUDENT_NOT_CLASSROOM_STUDENT -> HttpStatus.UNAUTHORIZED;
+                 STUDENT_NOT_CLASSROOM_STUDENT -> HttpStatus.FORBIDDEN;
             case ACTIVITY_NOT_SUBMITTED,
                  ALREADY_GRADED -> HttpStatus.CONFLICT;
               case INVALID_SCORE,
