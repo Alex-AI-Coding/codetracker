@@ -2,6 +2,7 @@ package com.io.kira.infrastructure.auth.filter;
 
 import com.io.kira.adapter.auth.out.security.CustomUserDetailsService;
 import com.io.kira.adapter.auth.out.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,14 +12,21 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
+
+    public static final String AUTH_FAILURE_HEADER = "X-CodeTracker-Auth-Failure";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwtFilter.class);
 
     private final JwtService jwtService;
     private final CustomUserDetailsService customUserDetailsService;
@@ -58,24 +66,47 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             String authId = jwtService.extractAuthId(token);
 
-            if (authId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (authId == null || authId.isBlank()) {
+                rejectUnauthorized(request, response, "token-invalid");
+                return;
+            }
+
+            if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(authId);
 
-                if (jwtService.isTokenValid(token, userDetails)) {
-
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                    authenticationToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                if (!jwtService.isTokenValid(token, userDetails)) {
+                    rejectUnauthorized(request, response, "token-rejected");
+                    return;
                 }
+
+                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                authenticationToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
-        catch(JwtException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        catch (ExpiredJwtException e) {
+            rejectUnauthorized(request, response, "token-expired");
             return;
         }
-        catch(Exception e) {
+        catch (JwtException e) {
+            rejectUnauthorized(request, response, "token-invalid");
+            return;
+        }
+        catch (UsernameNotFoundException e) {
+            rejectUnauthorized(request, response, "account-not-found");
+            return;
+        }
+        catch (Exception e) {
+            LOGGER.error(
+                    "Unexpected JWT authentication failure: type={} method={} path={}",
+                    e.getClass().getSimpleName(),
+                    request.getMethod(),
+                    request.getRequestURI()
+            );
+            response.setHeader(AUTH_FAILURE_HEADER, "internal-error");
+            response.setHeader("Cache-Control", "no-store");
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
         }
@@ -86,6 +117,24 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().equals("/api/auth/refresh");
+    }
+
+    private void rejectUnauthorized(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            String reason
+    ) {
+        // Never log the JWT or cookie value. The category and request path are
+        // sufficient to diagnose production failures without exposing secrets.
+        LOGGER.warn(
+                "JWT authentication rejected: reason={} method={} path={}",
+                reason,
+                request.getMethod(),
+                request.getRequestURI()
+        );
+        response.setHeader(AUTH_FAILURE_HEADER, reason);
+        response.setHeader("Cache-Control", "no-store");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 
 }
