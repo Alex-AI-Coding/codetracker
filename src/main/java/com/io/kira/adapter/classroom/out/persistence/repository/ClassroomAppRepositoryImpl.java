@@ -1,6 +1,7 @@
 package com.io.kira.adapter.classroom.out.persistence.repository;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -97,7 +98,7 @@ public class ClassroomAppRepositoryImpl implements ClassroomAppRepository {
         return jpaClassroomRepository.findByInstructorUserId(instructorUserId)
             .stream()
             .map(ClassroomAggregateMapper::toDomain)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override

@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.redis.serializer.GenericJacksonJsonRedisSerializer;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,8 @@ class RedisConfigTest {
                 Instant.parse("2026-08-30T00:00:00Z")
         );
 
-        Object restored = serializer.deserialize(serializer.serialize(List.of(activity)));
+        List<Activity> cachedActivities = new ArrayList<>(List.of(activity));
+        Object restored = serializer.deserialize(serializer.serialize(cachedActivities));
 
         assertThat(restored).isInstanceOf(List.class);
         List<?> restoredActivities = (List<?>) restored;

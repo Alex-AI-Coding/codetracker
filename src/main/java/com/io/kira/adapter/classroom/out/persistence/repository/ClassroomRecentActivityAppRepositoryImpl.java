@@ -56,6 +56,6 @@ public class ClassroomRecentActivityAppRepositoryImpl implements ClassroomRecent
                 .filter(activity -> activity.occurredAt() != null)
                 .sorted(Comparator.comparing(ClassroomRecentActivityData::occurredAt).reversed())
                 .limit(limit)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

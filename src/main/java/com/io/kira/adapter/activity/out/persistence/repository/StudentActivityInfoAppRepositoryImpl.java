@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.cache.annotation.Cacheable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ public class StudentActivityInfoAppRepositoryImpl implements StudentActivityInfo
             key = "@activityInfoCacheKey.studentsByClassroomId(#classroomId)",
             unless = "#result.isEmpty()")
     public List<StudentSummaryData> findClassroomStudents(UUID classroomId) {
-        return jpaClassroomStudentRepository.findStudentActivityInfoStudentsByClassroomId(classroomId);
+        return new ArrayList<>(jpaClassroomStudentRepository.findStudentActivityInfoStudentsByClassroomId(classroomId));
     }
 
     @Override
@@ -33,6 +34,6 @@ public class StudentActivityInfoAppRepositoryImpl implements StudentActivityInfo
             key = "@activityInfoCacheKey.submissionsByClassroomId(#classroomId)",
             unless = "#result.isEmpty()")
     public List<StudentSubmissionDetailsData> findStudentActivityInfos(UUID classroomId) {
-        return jpaStudentActivityRepository.findStudentActivityInfosByClassroomId(classroomId);
+        return new ArrayList<>(jpaStudentActivityRepository.findStudentActivityInfosByClassroomId(classroomId));
     }
 }

@@ -19,6 +19,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
     public List<Activity> findActivitiesByClassroomId(UUID classroomId) {
         return jpa.findActivitiesByClassroomId(classroomId).stream()
                 .map(ActivityMapper::toDomain)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -70,7 +71,7 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
     public List<Activity> findActivitiesByClassroomIdAndInstructorUserId(UUID classroomId, UUID instructorId) {
         return jpa.findByClassroomEntity_ClassroomIdAndClassroomEntity_InstructorUserId(classroomId, instructorId).stream().map(
                 ActivityMapper::toDomain
-        ).collect(Collectors.toList());
+        ).collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -124,6 +125,6 @@ public class ActivityAppRepositoryImpl implements ActivityAppRepository {
             key = "@activityCacheKey.studentActivitiesByClassroomIdAndUserId(#classroomId, #userId)",
             unless = "#result.isEmpty()")
     public List<StudentActivityOverviewData> findStudentActivities(UUID classroomId, UUID userId) {
-        return jpa.findStudentActivityViewsByClassroomIdAndUserId(classroomId, userId);
+        return new ArrayList<>(jpa.findStudentActivityViewsByClassroomIdAndUserId(classroomId, userId));
     }
 }

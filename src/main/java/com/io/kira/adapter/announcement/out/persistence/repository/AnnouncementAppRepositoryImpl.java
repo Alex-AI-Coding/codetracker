@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.List;
 import java.util.UUID;
@@ -64,6 +65,6 @@ public class AnnouncementAppRepositoryImpl implements AnnouncementAppRepository 
         return announcementRepository.findAllByClassroomIdOrderByCreatedAtDesc(classroomId)
                 .stream()
                 .map(AnnouncementMapper::toDomain)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

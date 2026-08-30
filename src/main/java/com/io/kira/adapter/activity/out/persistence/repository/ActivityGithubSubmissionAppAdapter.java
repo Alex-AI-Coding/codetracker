@@ -1,6 +1,7 @@
 package com.io.kira.adapter.activity.out.persistence.repository;
 
 
+import java.util.ArrayList;
 import java.util.UUID;
 import com.io.kira.adapter.activity.out.cache.ActivityCacheNames;
 import com.io.kira.adapter.activity.out.persistence.mapper.ActivityMapper;
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 @AllArgsConstructor
@@ -33,12 +35,12 @@ public class ActivityGithubSubmissionAppAdapter implements ActivityGithubSubmiss
         List<ActivityEntity> activityEntityList = jpaActivityRepository.findActivitiesByClassroomId(classroomId);
 
         if(activityEntityList.isEmpty())
-            return List.of();
+            return new ArrayList<>();
 
         return activityEntityList.stream()
                 .filter(activity -> !submittedActivityIds.contains(activity.getActivityId()))
                 .map(ActivityMapper::toDomain)
                 .map(ActivityDetailsData::from)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 }

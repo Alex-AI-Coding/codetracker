@@ -69,7 +69,7 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
                 .findEnrollmentsByStatus(studentUserId, StudentStatus.ACTIVE, ClassroomStatus.ACTIVE);
         return entities.stream()
                 .map(ClassroomStudentMapper::toDomain)
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -91,7 +91,9 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
     }
 
     private List<ClassroomStudent> mapToDomain(List<ClassroomStudentEntity> entities) {
-        return entities.stream().map(ClassroomStudentMapper::toDomain).collect(Collectors.toList());
+        return entities.stream()
+                .map(ClassroomStudentMapper::toDomain)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
@@ -108,4 +110,3 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
     }
 
 }
-
