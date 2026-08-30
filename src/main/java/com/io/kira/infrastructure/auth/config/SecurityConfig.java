@@ -4,6 +4,7 @@ package com.io.kira.infrastructure.auth.config;
 import com.io.kira.adapter.auth.out.security.BCryptPasswordHasher;
 import com.io.kira.infrastructure.auth.filter.JwtFilter;
 
+import jakarta.servlet.DispatcherType;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,12 @@ public class SecurityConfig {
                             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
                         }))
                 .authorizeHttpRequests(auth -> auth
+                        // Preserve the original status and response for errors.
+                        // Protecting Spring Boot's internal /error dispatch
+                        // converts application failures into misleading 401s.
+                        .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers(
+                                "/error",
                                 "/api/oauth/github/authorize",
                                 "/api/oauth/github/callback",
                                 "/api/auth/check",
