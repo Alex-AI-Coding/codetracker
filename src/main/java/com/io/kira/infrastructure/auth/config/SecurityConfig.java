@@ -18,10 +18,14 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
 
         private final UserDetailsService userDetailsService;
         private final JwtFilter jwtFilter;
@@ -41,6 +45,13 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
+                            LOGGER.warn(
+                                    "Authentication rejected: reason=authentication-required method={} path={}",
+                                    request.getMethod(),
+                                    request.getRequestURI()
+                            );
+                            response.setHeader(JwtFilter.AUTH_FAILURE_HEADER, "authentication-required");
+                            response.setHeader("Cache-Control", "no-store");
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         })
                         .accessDeniedHandler((request, response, accessDeniedException) -> {

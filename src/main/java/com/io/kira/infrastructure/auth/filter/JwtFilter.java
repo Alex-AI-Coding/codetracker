@@ -39,24 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String token = null;
-        String authHeader = request.getHeader("Authorization");
-
-        if(authHeader != null && authHeader.startsWith("Bearer ")) {
-            token = authHeader.substring(7);
-        } else {
-
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie cookie : cookies) {
-
-                    if ("jwt".equals(cookie.getName())) {
-                        token = cookie.getValue();
-                        break;
-                    }
-                }
-            }
-        }
+        String token = extractToken(request);
 
         if (token == null || token.isEmpty()) {
             filterChain.doFilter(request, response);
@@ -117,6 +100,48 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return request.getServletPath().equals("/api/auth/refresh");
+    }
+
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String bearerToken = authHeader.substring(7).trim();
+            if (!bearerToken.isEmpty()) {
+                return bearerToken;
+            }
+        }
+
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if ("jwt".equals(cookie.getName()) && cookie.getValue() != null && !cookie.getValue().isBlank()) {
+                    return cookie.getValue();
+                }
+            }
+        }
+
+        // Some servlet containers/proxies may leave getCookies() empty even
+        // though the original Cookie header is present. JWTs contain no
+        // semicolons, so parsing only the named segment is safe here.
+        String rawCookieHeader = request.getHeader("Cookie");
+        if (rawCookieHeader == null || rawCookieHeader.isBlank()) {
+            return null;
+        }
+
+        for (String segment : rawCookieHeader.split(";")) {
+            int separator = segment.indexOf('=');
+            if (separator <= 0) {
+                continue;
+            }
+
+            String name = segment.substring(0, separator).trim();
+            String value = segment.substring(separator + 1).trim();
+            if ("jwt".equals(name) && !value.isBlank()) {
+                return value;
+            }
+        }
+
+        return null;
     }
 
     private void rejectUnauthorized(

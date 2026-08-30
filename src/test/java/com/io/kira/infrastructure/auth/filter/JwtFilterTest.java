@@ -110,6 +110,59 @@ class JwtFilterTest {
         assertThat(response.getHeader(JwtFilter.AUTH_FAILURE_HEADER)).isNull();
     }
 
+    @Test
+    void rawCookieHeaderAuthenticatesWhenServletCookieParsingReturnsNothing() throws Exception {
+        UUID authId = UUID.randomUUID();
+        JwtService jwtService = new JwtService(SIGNING_SECRET, 300_000);
+        CustomUserDetailsService userDetailsService = mock(CustomUserDetailsService.class);
+        UserDetails userDetails = User.withUsername(authId.toString())
+                .password("unused")
+                .authorities("ROLE_PROFESSOR")
+                .build();
+        when(userDetailsService.loadUserByUsername(authId.toString())).thenReturn(userDetails);
+
+        JwtFilter filter = new JwtFilter(jwtService, userDetailsService);
+        FilterChain chain = mock(FilterChain.class);
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/classrooms/test/activities/owner");
+        request.setServletPath("/api/classrooms/test/activities/owner");
+        request.addHeader(
+                "Cookie",
+                "device_id=test-device; jwt=" + jwtService.generateToken(authId) + "; refresh_token=test-refresh"
+        );
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        assertThat(request.getCookies()).isNull();
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(response.getHeader(JwtFilter.AUTH_FAILURE_HEADER)).isNull();
+    }
+
+    @Test
+    void blankBearerHeaderDoesNotOverrideValidJwtCookie() throws Exception {
+        UUID authId = UUID.randomUUID();
+        JwtService jwtService = new JwtService(SIGNING_SECRET, 300_000);
+        CustomUserDetailsService userDetailsService = mock(CustomUserDetailsService.class);
+        UserDetails userDetails = User.withUsername(authId.toString())
+                .password("unused")
+                .authorities("ROLE_PROFESSOR")
+                .build();
+        when(userDetailsService.loadUserByUsername(authId.toString())).thenReturn(userDetails);
+
+        JwtFilter filter = new JwtFilter(jwtService, userDetailsService);
+        FilterChain chain = mock(FilterChain.class);
+        MockHttpServletRequest request = protectedRequest(jwtService.generateToken(authId));
+        request.addHeader("Authorization", "Bearer ");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        filter.doFilter(request, response, chain);
+
+        verify(chain).doFilter(request, response);
+        assertThat(SecurityContextHolder.getContext().getAuthentication()).isNotNull();
+        assertThat(response.getHeader(JwtFilter.AUTH_FAILURE_HEADER)).isNull();
+    }
+
     private MockHttpServletRequest protectedRequest(String token) {
         MockHttpServletRequest request = new MockHttpServletRequest("GET", "/api/classrooms/test/activities/owner");
         request.setServletPath("/api/classrooms/test/activities/owner");
