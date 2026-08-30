@@ -50,10 +50,10 @@ public class ActivityClassroomAppAdapter implements ActivityClassroomAppPort {
 
     @Override
     @Cacheable(value = ActivityCacheNames.ACTIVITY,
-            key = "@activityCacheKey.maxScoreByClassroomIdAndActivityId(#classroomId, #activityId)")
+            key = "@activityCacheKey.maxScoreByClassroomIdAndActivityId(#classroomId, #activityId)",
+            unless = "#result == null")
     public Optional<Integer> findMaxScoreByClassroomIdAndActivityId(UUID classroomId, UUID activityId) {
         return jpaActivityRepository.findMaxScoreByClassroomIdAndActivityId(classroomId, activityId);
     }
 
 }
-

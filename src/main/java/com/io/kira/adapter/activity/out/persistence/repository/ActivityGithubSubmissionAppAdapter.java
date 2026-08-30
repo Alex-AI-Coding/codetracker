@@ -28,7 +28,7 @@ public class ActivityGithubSubmissionAppAdapter implements ActivityGithubSubmiss
             key = "@activityCacheKey.unsubmittedRepositoryActivityByClassroomIdAndUserId(#classroomId, #userId)",
             unless = "#result.isEmpty()")
     public List<ActivityDetailsData> getUnsubmittedRepositoryActivity(UUID classroomId, UUID userId) {
-        Set<String> submittedActivityIds = jpaStudentActivityRepository.findActivityIdsByClassroomIdAndUserId(classroomId,userId);
+        Set<UUID> submittedActivityIds = jpaStudentActivityRepository.findActivityIdsByClassroomIdAndUserId(classroomId,userId);
 
         List<ActivityEntity> activityEntityList = jpaActivityRepository.findActivitiesByClassroomId(classroomId);
 
@@ -42,4 +42,3 @@ public class ActivityGithubSubmissionAppAdapter implements ActivityGithubSubmiss
                 .toList();
     }
 }
-

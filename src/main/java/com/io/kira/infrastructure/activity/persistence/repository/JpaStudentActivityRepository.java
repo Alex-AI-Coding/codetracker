@@ -17,7 +17,7 @@ public interface JpaStudentActivityRepository extends JpaRepository<StudentActiv
     Optional<StudentActivityEntity> findByUserEntity_UserIdAndActivityEntity_ActivityId(UUID userId, UUID activityId);
 
     @Query("SELECT sa.activityEntity.activityId FROM StudentActivityEntity sa WHERE sa.activityEntity.classroomEntity.classroomId = :classroomId AND sa.userEntity.userId = :userId")
-    Set<String> findActivityIdsByClassroomIdAndUserId(@Param("classroomId") UUID classroomId,@Param("userId") UUID userId);
+    Set<UUID> findActivityIdsByClassroomIdAndUserId(@Param("classroomId") UUID classroomId,@Param("userId") UUID userId);
 
     @Query("""
             SELECT new com.io.kira.application.activity.result.StudentSubmissionDetailsData(
@@ -29,4 +29,3 @@ public interface JpaStudentActivityRepository extends JpaRepository<StudentActiv
             """)
     List<StudentSubmissionDetailsData> findStudentActivityInfosByClassroomId(@Param("classroomId") UUID classroomId);
 }
-

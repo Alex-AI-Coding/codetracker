@@ -14,7 +14,7 @@ public final class ActivityCacheKey {
         return "by-classroom-id-and-instructor-user-id:" + classroomId + ":" + instructorUserId;
     }
 
-    public String byId(String activityId) {
+    public String byId(UUID activityId) {
         return "by-id:" + activityId;
     }
 
@@ -26,11 +26,11 @@ public final class ActivityCacheKey {
         return "unsubmitted-repository-activity-by-classroom-id-and-user-id:" + classroomId + ":" + userId;
     }
 
-    public String existsByClassroomIdAndActivityId(UUID classroomId, String activityId) {
+    public String existsByClassroomIdAndActivityId(UUID classroomId, UUID activityId) {
         return "exists-by-classroom-id-and-activity-id:" + classroomId + ":" + activityId;
     }
 
-    public String maxScoreByClassroomIdAndActivityId(UUID classroomId, String activityId) {
+    public String maxScoreByClassroomIdAndActivityId(UUID classroomId, UUID activityId) {
         return "max-score-by-classroom-id-and-activity-id:" + classroomId + ":" + activityId;
     }
 }

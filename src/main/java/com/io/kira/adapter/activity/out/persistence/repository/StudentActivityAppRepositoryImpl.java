@@ -39,7 +39,8 @@ public class StudentActivityAppRepositoryImpl implements StudentActivityAppRepos
 
     @Override
     @Cacheable(value = ActivityCacheNames.STUDENT_ACTIVITY,
-            key = "@studentActivityCacheKey.byUserIdAndActivityId(#userId, #activityId)")
+            key = "@studentActivityCacheKey.byUserIdAndActivityId(#userId, #activityId)",
+            unless = "#result == null")
     public Optional<StudentActivity> findByUserIdAndActivityId(UUID userId, UUID activityId) {
         return jpaStudentActivityRepository.findByUserEntity_UserIdAndActivityEntity_ActivityId(userId, activityId)
                 .map(StudentActivityMapper::toDomain);
@@ -47,7 +48,8 @@ public class StudentActivityAppRepositoryImpl implements StudentActivityAppRepos
 
     @Override
     @Cacheable(value = ActivityCacheNames.STUDENT_ACTIVITY,
-            key = "@studentActivityCacheKey.repositoryUrlByUserIdAndActivityId(#userId, #activityId)")
+            key = "@studentActivityCacheKey.repositoryUrlByUserIdAndActivityId(#userId, #activityId)",
+            unless = "#result == null")
     public Optional<String> findRepositoryUrlByUserIdAndActivityId(UUID userId, UUID activityId) {
         return jpaStudentActivityRepository.findByUserEntity_UserIdAndActivityEntity_ActivityId(userId, activityId)
                 .map(StudentActivityEntity::getGithubSubmission)
@@ -82,4 +84,3 @@ public class StudentActivityAppRepositoryImpl implements StudentActivityAppRepos
         return StudentActivityMapper.toDomain(savedEntity);
     }
 }
-

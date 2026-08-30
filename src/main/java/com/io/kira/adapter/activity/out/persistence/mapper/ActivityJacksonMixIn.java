@@ -11,7 +11,7 @@ public abstract class ActivityJacksonMixIn {
 
     @JsonCreator
     static Activity reconstitute(
-            String activityId,
+            UUID activityId,
             UUID classroomId,
             UUID instructorUserId,
             String title,
