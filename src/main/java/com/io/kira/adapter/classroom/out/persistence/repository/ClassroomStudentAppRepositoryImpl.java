@@ -101,7 +101,8 @@ public class ClassroomStudentAppRepositoryImpl implements ClassroomStudentAppRep
     }
 
     @Override
-    @Cacheable(value = ClassroomCacheNames.CLASSROOM_STUDENT, key = "@classroomStudentCacheKey.byClassroomIdAndUserId(#classroomId, #studentUserId)")
+    @Cacheable(value = ClassroomCacheNames.CLASSROOM_STUDENT, key = "@classroomStudentCacheKey.byClassroomIdAndUserId(#classroomId, #studentUserId)",
+    unless = "#result == null")
     public Optional<ClassroomStudent> findByClassroomIdAndStudentUserId(UUID classroomId, UUID studentUserId) {
         return jpaClassroomStudentRepository.findByClassroom_ClassroomIdAndStudentUserId(classroomId, studentUserId)
                 .map(ClassroomStudentMapper::toDomain);
